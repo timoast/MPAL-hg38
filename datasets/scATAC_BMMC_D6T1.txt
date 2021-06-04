@@ -1,3 +1,1 @@
-ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR103/082/SRR10343082/SRR10343082.fastq.gz
-ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR103/082/SRR10343082/SRR10343082_1.fastq.gz
-ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR103/082/SRR10343082/SRR10343082_2.fastq.gz
+s3://sra-pub-src-17/SRR10343082/scATAC_BMMC_D6T1.bam.1

@@ -32,5 +32,7 @@ rule download:
     threads: 1
     shell:
         """
-        wget -i {input} -P data/{wildcards.dset}
+        while read line; do
+          aws s3 cp $line ./data/{dset}/
+        done < {input}
         """
