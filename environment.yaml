@@ -1,0 +1,6 @@
+name: mpal
+channels:
+    - bioconda
+dependencies:
+    - python>=3.7
+    - snakemake
