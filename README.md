@@ -12,8 +12,13 @@ SRA: https://www.ncbi.nlm.nih.gov/sra?term=SRP226885
 
 ## Instructions
 
-The workflow requires snakemake, so if you don't have snakemake installed you
-can create a new conda environment with snakemake using the following command:
+The data required is stored on AWS S3 (at the SRA), and the data egress is
+**not free**. To download the raw data, you will need to set up an AWS account
+and configure `awscli` to use your account.
+
+The workflow requires snakemake, so if you don't have snakemake
+installed you can create a new conda environment with snakemake using the
+following command:
 
 ```
 mamba env create -f environment.yaml
@@ -27,5 +32,5 @@ snakemake -j 1
 ```
 
 This will download cellranger-atac 2.0.0, the hg38 reference genome, the raw
-FASTQ files from ENA, and map the reads to hg38. The final output will be
+data from SRA, and map the reads to hg38. The final output will be
 a scATAC-seq fragment file for each sample.
