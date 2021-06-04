@@ -1,3 +1,8 @@
+samples = ["scATAC_BMMC_D6T1"]
+
+rule all:
+  input: expand("data/{dset}/download.done", dset = samples)
+
 rule install_cellranger_atac:
   output: "cellranger-atac-2.0.0/cellranger-atac"
   message: "Installing Cellranger-atac v2"
