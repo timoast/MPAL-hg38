@@ -3,15 +3,26 @@ samples = ["scATAC_BMMC_D6T1"]
 rule all:
   input: expand("data/{dset}/download.done", dset = samples)
 
-rule install_cellranger_atac:
-  output: "cellranger-atac-2.0.0/cellranger-atac"
-  message: "Installing Cellranger-atac v2"
+
+rule install_bamtofastq:
+  output: "code/bamtofastq"
+  message: "Installing bamtofastq"
   threads: 1
   shell:
     """
-    curl -o cellranger-atac-2.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-atac/cellranger-atac-2.0.0.tar.gz?Expires=1622882840&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9jZi4xMHhnZW5vbWljcy5jb20vcmVsZWFzZXMvY2VsbC1hdGFjL2NlbGxyYW5nZXItYXRhYy0yLjAuMC50YXIuZ3oiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE2MjI4ODI4NDB9fX1dfQ__&Signature=L3oAHwn6B~K~jZfX7W13lmsq3whfTkLdgO9Dalw~HdRqotrDPlUWBT6I2r4RWed7kBdoOtGoEowTxb~ek3oljyoXslyDyr9lTXRNY9iiu-cNYGrpwTXo3QEVnDt60FBjfV4OlqkH7rZGP~GZZdSYaccWo13U9tQ4IL0fR1A6nsQBQeBnTBGwJl6T6jIv66LqiMwVejMi6i~UjZ--s7BPLbIl5Kvs2MndrnWrJdFfztF1qYV-pMGAm6PEOMOwWtTd~~eA3XIc4YTh2Ab60OZW4PsarSLGQcj7bsW3Lhtf6zouqGRZ6ELM~9QZNgQyNLGw2nMMshEcOctLwE8BWZfNTw__&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA"
-    tar -xzvf cellranger-atac-2.0.0.tar.gz
-    rm cellranger-atac-2.0.0.tar.gz
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      wget https://github.com/10XGenomics/bamtofastq/releases/download/v1.3.5/bamtofastq_linux -P code
+      cd code
+      mv bamtofastq_linux bamtofastq
+      chmod +x bamtofastq
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      wget https://github.com/10XGenomics/bamtofastq/releases/download/v1.3.5/bamtofastq_macos -P code
+      cd code
+      mv bamtofastq_macos bamtofastq
+      chmod +x bamtofastq
+    else
+      echo "Unsupported OS"
+    fi
     """
 
 rule reference_genome:
@@ -27,7 +38,7 @@ rule reference_genome:
 
 rule download:
     input: "datasets/{dset}.txt"
-    output: touch("data/{dset}/download.done")
+    output: "data/{dset}.bam"
     message: "Download datasets"
     threads: 1
     shell:
@@ -36,3 +47,27 @@ rule download:
           aws s3 cp $line ./data/{dset}/
         done < {input}
         """
+
+rule unmap_bam:
+  input:
+    bam="data/{dset}.bam",
+    program="code/bamtofastq"
+  output: "data/{dset}/{dset}_1.fastq"
+  message: "Converting to FASTQ"
+  threads: 8
+  shell:
+    """
+    {input.program} --nthreads={threads} {input.bam} data/{wildcards.dset}/
+    """
+
+rule cellranger:
+  input:
+    fq="data/{dset}/{dset}_1.fastq",
+    genome=directory("refdata-cellranger-arc-GRCh38-2020-A-2.0.0")
+  output: directory("mapped/{dset}")
+  message: "Running cellranger-atac"
+  threads: 8
+  shell:
+    """
+    cellranger-atac
+    """
