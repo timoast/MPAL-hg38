@@ -1,8 +1,7 @@
 samples = ["scATAC_BMMC_D6T1"]
 
 rule all:
-  input: expand("data/{dset}/download.done", dset = samples)
-
+  input: expand("mapped/{dset}/outs/fragments.tsv.gz", dset = samples)
 
 rule install_bamtofastq:
   output: "code/bamtofastq"
@@ -54,7 +53,7 @@ rule unmap_bam:
     program="code/bamtofastq"
   output: "data/{dset}/{dset}_1.fastq"
   message: "Converting to FASTQ"
-  threads: 8
+  threads: 12
   shell:
     """
     {input.program} --nthreads={threads} {input.bam} data/{wildcards.dset}/
@@ -64,10 +63,15 @@ rule cellranger:
   input:
     fq="data/{dset}/{dset}_1.fastq",
     genome=directory("refdata-cellranger-arc-GRCh38-2020-A-2.0.0")
-  output: directory("mapped/{dset}")
+  output: "mapped/{dset}/outs/fragments.tsv.gz"
   message: "Running cellranger-atac"
-  threads: 8
+  threads: 12
   shell:
     """
-    cellranger-atac
+    cellranger-atac count \
+      --reference={input.genome} \
+      --id={wildcards.dset} \
+      --fastqs={inout.fq} \
+      --localcores={threads} \
+      --localmem=64
     """
