@@ -51,7 +51,7 @@ rule unmap_bam:
   input:
     bam="data/{dset}.bam",
     program="code/bamtofastq"
-  output: "data/{dset}/{dset}_1.fastq"
+  output: directory("data/{dset}")
   message: "Converting to FASTQ"
   threads: 12
   shell:
@@ -61,7 +61,7 @@ rule unmap_bam:
 
 rule cellranger:
   input:
-    fq="data/{dset}/{dset}_1.fastq",
+    fq=directory("data/{dset}"),
     genome=directory("refdata-cellranger-arc-GRCh38-2020-A-2.0.0")
   output: "mapped/{dset}/outs/fragments.tsv.gz"
   message: "Running cellranger-atac"
@@ -71,7 +71,7 @@ rule cellranger:
     cellranger-atac count \
       --reference={input.genome} \
       --id={wildcards.dset} \
-      --fastqs={inout.fq} \
+      --fastqs={input.fq} \
       --localcores={threads} \
       --localmem=64
     """
