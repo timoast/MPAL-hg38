@@ -54,7 +54,7 @@ rule download:
     shell:
         """
         while read line; do
-          gsutils -u mpal-hg38 cp $line ./data/
+          gsutil -u mpal-hg38 cp $line ./data/
         done < {input}
         """
 
@@ -64,7 +64,7 @@ rule unmap_bam:
     program="code/bamtofastq"
   output: directory("fastq/{dset}")
   message: "Converting to FASTQ"
-  threads: 32
+  threads: 24
   shell:
     """
     {input.program} --nthreads={threads} {input.bam} fastq/{wildcards.dset}/
@@ -74,8 +74,8 @@ rule unmap_bam:
 
 rule cellranger:
   input:
-    fq=directory("fastq/{dset}"),
-    genome=directory("refdata-cellranger-arc-GRCh38-2020-A-2.0.0")
+    fq="fastq/{dset}/",
+    genome="refdata-cellranger-arc-GRCh38-2020-A-2.0.0/"
   output: "mapped/{dset}/outs/fragments.tsv.gz"
   message: "Running cellranger-atac"
   threads: 12
