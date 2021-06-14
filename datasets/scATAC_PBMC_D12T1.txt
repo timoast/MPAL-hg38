@@ -1,1 +1,1 @@
-s3://sra-pub-src-16/SRR10343088/scATAC_PBMC_D12T1.bam.1
+gs://sra-pub-src-17/SRR10343088/scATAC_PBMC_D12T1.bam.1
