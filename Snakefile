@@ -1,4 +1,15 @@
-samples = ["scATAC_BMMC_D6T1"]
+samples = [
+"scATAC_BMMC_D5T1",
+"scATAC_BMMC_D6T1",
+"scATAC_CD34_D7T1",
+"scATAC_CD34_D8T1",
+"scATAC_CD34_D9T1",
+"scATAC_PBMC_D10T1",
+"scATAC_PBMC_D11T1",
+"scATAC_PBMC_D12T1",
+"scATAC_PBMC_D12T2",
+"scATAC_PBMC_D12T3"
+]
 
 rule all:
   input: expand("mapped/{dset}/outs/fragments.tsv.gz", dset = samples)
@@ -37,31 +48,33 @@ rule reference_genome:
 
 rule download:
     input: "datasets/{dset}.txt"
-    output: "data/{dset}.bam"
+    output: "data/{dset}.bam.1"
     message: "Download datasets"
     threads: 1
     shell:
         """
         while read line; do
-          aws s3 cp $line ./data/{dset}/
+          gsutils -u mpal-hg38 cp $line ./data/
         done < {input}
         """
 
 rule unmap_bam:
   input:
-    bam="data/{dset}.bam",
+    bam="data/{dset}.bam.1",
     program="code/bamtofastq"
-  output: directory("data/{dset}")
+  output: directory("fastq/{dset}")
   message: "Converting to FASTQ"
-  threads: 12
+  threads: 32
   shell:
     """
-    {input.program} --nthreads={threads} {input.bam} data/{wildcards.dset}/
+    {input.program} --nthreads={threads} {input.bam} fastq/{wildcards.dset}/
+    cd fastq/{wildcards.dset}
+    mv */* .
     """
 
 rule cellranger:
   input:
-    fq=directory("data/{dset}"),
+    fq=directory("fastq/{dset}"),
     genome=directory("refdata-cellranger-arc-GRCh38-2020-A-2.0.0")
   output: "mapped/{dset}/outs/fragments.tsv.gz"
   message: "Running cellranger-atac"
@@ -72,6 +85,6 @@ rule cellranger:
       --reference={input.genome} \
       --id={wildcards.dset} \
       --fastqs={input.fq} \
-      --localcores={threads} \
-      --localmem=64
+      --jobmode=./slurm.template
+    mv {wildcards.dset} mapped/
     """
