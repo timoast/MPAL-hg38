@@ -11,9 +11,9 @@ SRA: https://www.ncbi.nlm.nih.gov/sra?term=SRP226885
 
 ## Instructions
 
-The data required is stored on AWS S3 (at the SRA), and the data egress is
-**not free**. To download the raw data, you will need to set up an AWS account
-and configure `aws` to use your account by running `aws configure`.
+The data required is stored on Google Cloud (at the SRA), and the data egress is
+**not free**. To download the raw data, you will need to set up an GCP account
+and configure `gcloud` to use your account by running `gcloud init`.
 
 The workflow also requires cellranger-atac v2, which needs to be installed from
 the 10x Genomics website first (there's no programmatic way to install
