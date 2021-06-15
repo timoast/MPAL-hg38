@@ -12,7 +12,7 @@ samples = [
 ]
 
 rule all:
-  input: expand("mapped/{dset}/outs/fragments.tsv.gz", dset = samples)
+  input: expand("mapped/{dset}/fragments.tsv.gz", dset = samples)
 
 rule install_bamtofastq:
   output: "code/bamtofastq"
@@ -64,19 +64,17 @@ rule unmap_bam:
     program="code/bamtofastq"
   output: directory("fastq/{dset}")
   message: "Converting to FASTQ"
-  threads: 24
+  threads: 8
   shell:
     """
     {input.program} --nthreads={threads} {input.bam} fastq/{wildcards.dset}/
-    cd fastq/{wildcards.dset}
-    mv */* .
     """
 
 rule cellranger:
   input:
     fq="fastq/{dset}/",
     genome="refdata-cellranger-arc-GRCh38-2020-A-2.0.0/"
-  output: "mapped/{dset}/outs/fragments.tsv.gz"
+  output: "mapped/{dset}/fragments.tsv.gz"
   message: "Running cellranger-atac"
   threads: 12
   shell:
@@ -86,5 +84,5 @@ rule cellranger:
       --id={wildcards.dset} \
       --fastqs={input.fq} \
       --jobmode=./slurm.template
-    mv {wildcards.dset} mapped/
+    mv {wildcards.dset}/outs/fragments.tsv.gz {output}
     """
