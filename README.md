@@ -38,3 +38,5 @@ This will download the hg38 cellranger reference genome and the raw
 data from SRA (as BAM files). Raw data will be converted back to FASTQ using
 the `bamtofastq` program, then mapped to hg38. The final output will be
 the cellranger-atac output for each sample.
+
+![](dag.svg)
