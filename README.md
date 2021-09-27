@@ -40,3 +40,13 @@ the `bamtofastq` program, then mapped to hg38. The final output will be
 the cellranger-atac output for each sample.
 
 ![](dag.svg)
+
+
+## Downloading processed data
+
+The final outputs of this workflow (fragment files) is stored on AWS S3 and
+can be downloaded by running:
+
+```
+aws s3 cp s3://mpal-hg38/public/ . --no-sign-request
+```
