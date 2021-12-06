@@ -48,5 +48,5 @@ The final outputs of this workflow (fragment files) is stored on AWS S3 and
 can be downloaded by running:
 
 ```
-aws s3 sync s3://mpal-hg38/public/ . --no-sign-request
+aws s3 sync s3://mpal-hg38/public/ . --request-payer
 ```
